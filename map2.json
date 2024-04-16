@@ -1,0 +1,617 @@
+{
+    "rooms": [
+        {
+            "id": 0,
+            "name": "Kokiri Forest",
+            "desc_length": 159,
+            "description": "A small village full of life and wonder, befit for the Kokiri people. The village is surrounded by a dense forest, with a large tree looming in the background.",
+            "exits": [
+                "Lost Woods Entrance"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 1,
+            "name": "Lost Woods Entrance",
+            "desc_length": 198,
+            "description": "As you pass through the entrance you see 3 more paths. One to the left, one to the right, and one straight ahead. Becareful not to get lost in the fog, or you may find yourself back at the entrance.",
+            "exits": [
+                "Woods 01",
+                "Woods 02",
+                "Kokiri Forest",
+                "Woods 03"
+            ],
+            "characters": [],
+            "monsters": [
+                "Wolfos"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Woods 01",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 3,
+            "name": "Woods 02",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 04",
+                "Lost Woods Entrance",
+                "Woods 05"
+            ],
+            "characters": [],
+            "monsters": [
+                "Skullkid"
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Woods 03",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 06",
+                "Lost Woods Entrance",
+                "Below the Bridge",
+                "Woods 08"
+            ],
+            "characters": [],
+            "monsters": [
+                "Curious Skullkid"
+            ]
+        },
+        {
+            "id": 5,
+            "name": "Woods 04",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 09",
+                "Woods 10",
+                "Woods 02",
+                "Woods 11"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 6,
+            "name": "Woods 05",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 7,
+            "name": "Woods 06",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 8,
+            "name": "Bellow the Bridge",
+            "desc_length": 123,
+            "description": "A hidden path leads you to a small clearing under the bridge. You see a small deku scrub in the far corner of the clearing.",
+            "exits": [
+                "Woods 03"
+            ],
+            "characters": [],
+            "monsters": [
+                "Shopkeeper Deku Scrub"
+            ]
+        },
+        {
+            "id": 9,
+            "name": "Woods 08",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 10,
+            "name": "Woods 09",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 11,
+            "name": "Woods 10",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 12",
+                "Zora's River",
+                "Woods 14",
+                "Woods 04"
+            ],
+            "characters": [],
+            "monsters": [
+                "Ninja Deku Scrub"
+            ]
+        },
+        {
+            "id": 12,
+            "name": "Woods 11",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 13,
+            "name": "Woods 12",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 15",
+                "Woods 16",
+                "Woods 10",
+                "Woods 17"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 14,
+            "name": "Woods 14",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 15,
+            "name": "Woods 15",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 21",
+                "Woods 22",
+                "Woods 12",
+                "Woods 23"
+            ],
+            "characters": [],
+            "monsters": [
+                "Dumb Deku Scrub"
+            ]
+        },
+        {
+            "id": 16,
+            "name": "Woods 16",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 17,
+            "name": "Woods 17",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Woods 18",
+                "Woods 12",
+                "Goron City",
+                "Woods 20"
+            ],
+            "characters": [],
+            "monsters": [
+                "Agitated Deku Scrub",
+                "Suspicious Deku Scrub"
+            ]
+        },
+        {
+            "id": 18,
+            "name": "Woods 18",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 19,
+            "name": "Woods 20",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 20,
+            "name": "Woods 21",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 21,
+            "name": "Woods 22",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Kokiri Forest"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 22,
+            "name": "Woods 23",
+            "desc_length": 74,
+            "description": "An unsuspecting wooded area, indistinguisable from the rest of the forest.",
+            "exits": [
+                "Sacred Forest Meadow Entrance",
+                "Woods 15"
+            ],
+            "characters": [],
+            "monsters": [
+                "Skulltula"
+            ]
+        },
+        {
+            "id": 23,
+            "name": "Sacred Forest Meadow Entrance",
+            "desc_length": 144,
+            "description": "A large temple in the middle of the woods can be seen in the background. The area is guarded by several monsters hidden throughout a short maze.",
+            "exits": [
+                "Woods 23",
+                "Sacred Forest Meadow Exit"
+            ],
+            "characters": [],
+            "monsters": [
+                "Angry Deku Scrub",
+                "Buff Deku Scrub",
+                "Sleepy Deku Scrub"
+            ]
+        },
+        {
+            "id": 24,
+            "name": "Zora's River",
+            "desc_length": 122,
+            "description": "A long winding river infested with monsters. The Zora people live at the end of the river where the water is the cleanest.",
+            "exits": [
+                "Woods 10"
+            ],
+            "characters": [],
+            "monsters": [
+                "Red Tektite",
+                "Blue Tektite",
+                "Octorok"
+            ]
+        },
+        {
+            "id": 25,
+            "name": "Goron City",
+            "desc_length": 123,
+            "description": "Goron City is home to the Goron people, led by their Boss. There are a few shops, an inn, and more to be found in the city.",
+            "exits": [
+                "Woods 17"
+            ],
+            "characters": [],
+            "monsters": []
+        },
+        {
+            "id": 26,
+            "name": "Sacred Forest Meadow Exit",
+            "desc_length": 128,
+            "description": "As you reach the end of the maze you see the stairs leading to the temple. Several of Ganon's minions are guarding the entrance.",
+            "exits": [
+                "Sacred Forest Meadow Entrance",
+                "Forest Temple"
+            ],
+            "characters": [],
+            "monsters": [
+                "Moblin Bumayu",
+                "Moblin Dunblin",
+                "Moblin Hogblin",
+                "Great Moblin Gorblin"
+            ]
+        },
+        {
+            "id": 27,
+            "name": "Forest Temple",
+            "desc_length": 119,
+            "description": "The Forest Temple is a large temple with many rooms and puzzles to solve. You've reached the end of the maze! Congrats!",
+            "exits": [
+                "Sacred Forest Meadow Exit"
+            ],
+            "characters": [],
+            "monsters": []
+        }
+    ],
+    "monsters": [
+        {
+            "id": 0,
+            "name": "Wolfos",
+            "flags": "0xF8",
+            "attack": 10,
+            "defense": 5,
+            "regen": 0,
+            "health": 20,
+            "gold": 5,
+            "current_room": 1,
+            "desc_length": 60,
+            "description": "A bipedal wolf with sharp claws, teeth, and glowing red eyes"
+        },
+        {
+            "id": 1,
+            "name": "Skullkid",
+            "flags": "0xF8",
+            "attack": 20,
+            "defense": 10,
+            "regen": 2,
+            "health": 10,
+            "gold": 10,
+            "current_room": 3,
+            "desc_length": 236,
+            "description": "A figure dressed in a red cloak and hat covering an underlayer of clothing composed of a straw-like material, and play a flute, which they can also use as a weapon to shoot projectiles. Local say they are kids who got lost in the woods."
+        },
+        {
+            "id": 2,
+            "name": "Curious Skullkid",
+            "flags": "0xF8",
+            "attack": 20,
+            "defense": 10,
+            "regen": 2,
+            "health": 10,
+            "gold": 10,
+            "current_room": 4,
+            "desc_length": 236,
+            "description": "A figure dressed in a red cloak and hat covering an underlayer of clothing composed of a straw-like material, and play a flute, which they can also use as a weapon to shoot projectiles. Local say they are kids who got lost in the woods."
+        },
+        {
+            "id": 3,
+            "name": "Shopkeeper Deku Scrub",
+            "flags": "0xB8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 1,
+            "health": 10,
+            "gold": 20,
+            "current_room": 8,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, he seems to be trying to sell you something."
+        },
+        {
+            "id": 4,
+            "name": "Ninja Deku Scrub",
+            "flags": "0xF8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 1,
+            "health": 10,
+            "gold": 20,
+            "current_room": 11,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 5,
+            "name": "Dumb Deku Scrub",
+            "flags": "0xF8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 1,
+            "health": 10,
+            "gold": 20,
+            "current_room": 15,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 6,
+            "name": "Suspicious Deku Scrub",
+            "flags": "0xF8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 1,
+            "health": 10,
+            "gold": 20,
+            "current_room": 17,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 7,
+            "name": "Agitated Deku Scrub",
+            "flags": "0xF8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 1,
+            "health": 10,
+            "gold": 20,
+            "current_room": 17,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 8,
+            "name": "Skulltula",
+            "flags": "0xF8",
+            "attack": 2,
+            "defense": 20,
+            "regen": 0,
+            "health": 5,
+            "gold": 5,
+            "current_room": 22,
+            "desc_length": 105,
+            "description": "A fierce spider with a skull covering the top of it's exoskeleton. It's eyes glow yellow in the darkness."
+        },
+        {
+            "id": 9,
+            "name": "Blue Tektite",
+            "flags": "0xF8",
+            "attack": 6,
+            "defense": 10,
+            "regen": 0,
+            "health": 4,
+            "gold": 8,
+            "current_room": 24,
+            "desc_length": 115,
+            "description": "A spider-like creature with a hard shell and four legs. They are known to jump great distances to attack their prey."
+        },
+        {
+            "id": 10,
+            "name": "Red Tektite",
+            "flags": "0xF8",
+            "attack": 6,
+            "defense": 10,
+            "regen": 0,
+            "health": 4,
+            "gold": 8,
+            "current_room": 24,
+            "desc_length": 115,
+            "description": "A spider-like creature with a hard shell and four legs. They are known to jump great distances to attack their prey."
+        },
+        {
+            "id": 11,
+            "name": "Octorok",
+            "flags": "0xF8",
+            "attack": 25,
+            "defense": 0,
+            "regen": 0,
+            "health": 10,
+            "gold": 24,
+            "current_room": 24,
+            "desc_length": 109,
+            "description": "A creature with a round body and a single eye. They are known to shoot rocks at their prey from their mouths."
+        },
+        {
+            "id": 12,
+            "name": "Buff Deku Scrub",
+            "flags": "0xF8",
+            "attack": 10,
+            "defense": 8,
+            "regen": 1,
+            "health": 16,
+            "gold": 20,
+            "current_room": 23,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 13,
+            "name": "Sleepy Deku Scrub",
+            "flags": "0xF8",
+            "attack": 5,
+            "defense": 8,
+            "regen": 10,
+            "health": 10,
+            "gold": 20,
+            "current_room": 23,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 14,
+            "name": "Angry Deku Scrub",
+            "flags": "0xF8",
+            "attack": 15,
+            "defense": 8,
+            "regen": 1,
+            "health": 5,
+            "gold": 20,
+            "current_room": 23,
+            "desc_length": 169,
+            "description": "A plant-based creature that has skin seemingly made of wood and hair. Their 'clothing' is made of leaves and flowers, and spit Deku Nuts at their enemies when threatened"
+        },
+        {
+            "id": 15,
+            "name": "Moblin Bumayu",
+            "flags": "0xF8",
+            "attack": 15,
+            "defense": 15,
+            "regen": 0,
+            "health": 10,
+            "gold": 15,
+            "current_room": 26,
+            "desc_length": 132,
+            "description": "A large, muscular creature with a pig-like face and a large spear. They are known to be very aggressive towards people when spotted."
+        },
+        {
+            "id": 16,
+            "name": "Moblin Dunblin",
+            "flags": "0xF8",
+            "attack": 15,
+            "defense": 15,
+            "regen": 0,
+            "health": 10,
+            "gold": 15,
+            "current_room": 26,
+            "desc_length": 132,
+            "description": "A large, muscular creature with a pig-like face and a large spear. They are known to be very aggressive towards people when spotted."
+        },
+        {
+            "id": 17,
+            "name": "Moblin Hogblin",
+            "flags": "0xF8",
+            "attack": 15,
+            "defense": 15,
+            "regen": 0,
+            "health": 10,
+            "gold": 15,
+            "current_room": 26,
+            "desc_length": 132,
+            "description": "A large, muscular creature with a pig-like face and a large spear. They are known to be very aggressive towards people when spotted."
+        },
+        {
+            "id": 18,
+            "name": "Great Moblin Gorblin",
+            "flags": "0xF8",
+            "attack": 50,
+            "defense": 20,
+            "regen": 0,
+            "health": 20,
+            "gold": 30,
+            "current_room": 26,
+            "desc_length": 144,
+            "description": "A larger, more muscular version of the Moblin with a large club that creates shock waves. They are known to be the leaders of the Moblin tribes."
+        }
+    ]
+}

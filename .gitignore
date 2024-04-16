@@ -1,0 +1,8 @@
+# Ignore all files in the logs directory
+/logs
+/target
+
+# Not needed for git
+description1.txt
+map1.json
+start.sh
