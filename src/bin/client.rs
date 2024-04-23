@@ -12,6 +12,8 @@ use gtk::{
     TextView
 };
 use regex::Regex;
+use std::io::Read;
+use std::fs::File;
 
 fn main() {
     let app = Application::builder()
@@ -55,7 +57,8 @@ fn build_ui(app: &Application) {
         .margin_end(12)
         .build();
 
-    let text_buf = TextBuffer::new(Some(&TextTagTable::new()));
+    let table = TextTagTable::new();
+    let text_buf = TextBuffer::new(Some(&table));
 
     let text_view = TextView::builder()
         .buffer(&text_buf)
@@ -66,7 +69,8 @@ fn build_ui(app: &Application) {
         .margin_end(12)
         .build();
 
-    text_view.set_size_request(500, 300);
+    text_view.set_editable(false);
+    text_view.set_size_request(1080, 750);
 
     let content = Box::new(Orientation::Vertical, 0);
 
@@ -76,12 +80,23 @@ fn build_ui(app: &Application) {
     content.append(&text_view);
     content.append(&command_input);
     
-    // We create the main window.
+    // Create the main window.
     let win = ApplicationWindow::builder()
-        .title("Lurk Soldier")
+        .title("Lurk Knight Client")
         .application(app)
+        .default_width(1920)
+        .default_height(1080)
         .child(&content)
         .build();
+
+    // Load Lurk Soldier Logo
+    let mut file = File::open("/home/rjziegler/lurk-server/logo.txt").expect("Unable to opne logo text file.");
+
+    let mut description = String::new();
+
+    file.read_to_string(&mut description).expect("Unable to read the file.");
+
+    text_buf.set_text(description.as_str());
 
     button.connect_clicked(move |_| connect(&label, &server_input, &text_buf));
 
