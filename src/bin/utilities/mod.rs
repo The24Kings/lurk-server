@@ -366,7 +366,7 @@ pub fn send_info(stream: &Arc<TcpStream>, messages: &Sender<Message>, initial_po
         message_type: 14,
         major_rev: 2,
         minor_rev: 3,
-        extention_len: 0,
+        extension_len: 0,
         extensions: Vec::new()
     };
 

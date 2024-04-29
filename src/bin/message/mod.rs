@@ -303,7 +303,7 @@ pub enum Message {
     /// 
     /// `minor_rev`: 1 byte - 2
     /// 
-    /// `extention_len`: 2 bytes - 3-4
+    /// `extension_len`: 2 bytes - 3-4
     /// 
     /// `extensions`: variable length - 5+
     /// 
@@ -317,7 +317,7 @@ pub enum Message {
         message_type: u8,
         major_rev: u8,
         minor_rev: u8,
-        extention_len: u16, // Can be 0, just ignore
+        extension_len: u16, // Can be 0, just ignore
         extensions: Vec<u8>, // 0-1 length, 2-+ first extention;
     }
 }
@@ -364,8 +364,8 @@ impl Display for Message {
             Message::Connection { author, message_type, room_number, room_name, description_len, description } => {
                 write!(f, "Connection {{ author: {:?}, message_type: {}, room_number: {:?}, room_name: {:?}, description_len: {:?}, description: {:?} }}", author, message_type, room_number, room_name, description_len, description)
             },
-            Message::Version { author, message_type, major_rev, minor_rev, extention_len, extensions } => {
-                write!(f, "Version {{ author: {:?}, message_type: {}, major_rev: {}, minor_rev: {}, extention_len: {:?}, extensions: {:?} }}", author, message_type, major_rev, minor_rev, extention_len, extensions)
+            Message::Version { author, message_type, major_rev, minor_rev, extension_len, extensions } => {
+                write!(f, "Version {{ author: {:?}, message_type: {}, major_rev: {}, minor_rev: {}, extension_len: {:?}, extensions: {:?} }}", author, message_type, major_rev, minor_rev, extension_len, extensions)
             }
         }
     }
