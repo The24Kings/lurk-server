@@ -1,9 +1,0 @@
-   Compiling lurk-server v0.1.0 (/home/rjziegler/spring2024/cs435/lurk_server)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.37s
-     Running `target/debug/client localhost 5050`
-Reading version message
-Major: 2, Minor: 3, Ext Size: 0
-Sending version message
-Reading game message
-Initial Points: 40, Stat Limit: 500, Desc Len: 2062
-Sending game message
