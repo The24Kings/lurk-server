@@ -37,16 +37,6 @@ fn main() -> Result<()> {
     let address = format!("{}:{}", args[1], args[2]);
     let stream: Arc<TcpStream>;
 
-    match TcpStream::connect(&address) {
-        Ok(s) => {
-            stream = Arc::new(s);        
-        },
-        Err(e) => {
-            eprintln!("Error: Could not connect to server: {}", e);
-            return Err(e);
-        }
-    }
-
     // Crate mscp channel
     let (message_sender, message_receiver) = channel();
 
@@ -63,12 +53,14 @@ fn main() -> Result<()> {
     let mut output: Vec<String> = Vec::new();
     
     // Set up the terminal
+    stdout().queue(EnterAlternateScreen).unwrap();
     let _ = terminal::enable_raw_mode();
 
     let (mut w, mut h) = terminal::size().unwrap();
-    let mut seperator = "=".repeat(w as usize);
+    
+    let mut seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
     let mut prompt = String::new();
-    let user_input = "> ".to_string();
+    let user_input = "\x1b[36m> \x1b[0m ".to_string();
 
     let mut stop = false;
 
@@ -80,14 +72,31 @@ fn main() -> Result<()> {
         h: h - 2
     };
 
-    // Enter alternate screen
-    stdout().queue(EnterAlternateScreen).unwrap();
+    /* { Misc. User Messages } */
+    push_to_output(&mut output, format!("\x1b[32mConnecting to host {}...\x1b[0m", address), &mut main_window);
+
+    // Connect to the server
+    match TcpStream::connect(&address) {
+        Ok(s) => {
+            stream = Arc::new(s);
+            push_to_output(&mut output, String::from("\x1b[92mConnected!\x1b[0m\n\n"), &mut main_window);
+        },
+        Err(e) => {
+            eprintln!("Error: Could not connect to server: {}", e);
+            clean_up(stdout().by_ref());
+
+            return Err(e);
+        }
+    }
 
     // Clear the screen
     stdout().queue(Clear(ClearType::All)).unwrap();
 
     // Push the logo to the output buffer
     push_to_output(&mut output, logo_txt, &mut main_window);
+
+    // TODO: Remove this later -> Warning
+    push_to_output(&mut output, String::from("\x1b[31mWARNING\x1b[0m -> \x1b[4mThis client is still heavily under development\x1b[0m <- \x1b[31mWARNING\x1b[0m\n\n"), &mut main_window);
 
     thread::spawn(move || listen_to_server(&stream, message_sender));
 
@@ -99,7 +108,7 @@ fn main() -> Result<()> {
                     w = nw;
                     h = nh;
 
-                    seperator = "=-".repeat(w as usize);
+                    seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
 
                     // Clear the screen
                     stdout().queue(Clear(ClearType::All)).unwrap();
@@ -148,14 +157,14 @@ fn main() -> Result<()> {
                     Message::Game { author : _, message_type, initial_points, stat_limit, description_len: _, description } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
+                            format!("\x1b[32mType\x1b[0m: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
                             &mut main_window
                         );
                     },
                     Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n\n", message_type, major_rev, minor_rev, extension_len), 
+                            format!("\x1b[32mType\x1b[0m: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n\n", message_type, major_rev, minor_rev, extension_len), 
                             &mut main_window
                         );
                     }
@@ -165,6 +174,8 @@ fn main() -> Result<()> {
             Err(err) => {
                 if err == std::sync::mpsc::TryRecvError::Disconnected {
                     eprintln!("Error: Listening thread crashed");
+                    clean_up(stdout().by_ref());
+
                     return Err(Error::new(io::ErrorKind::Other, "Listening thread crashed"));
                 }
             }
@@ -192,15 +203,7 @@ fn main() -> Result<()> {
         thread::sleep(Duration::from_millis(50));
     };
 
-    // Clean up
-    let _ = terminal::disable_raw_mode().unwrap();
-    stdout().queue(Clear(ClearType::All)).unwrap();
-    stdout().queue(MoveTo(0, 0)).unwrap();
-
-    // Leave alternate screen
-    stdout().queue(LeaveAlternateScreen).unwrap();
-
-    stdout().flush().unwrap();
+    clean_up(stdout().by_ref());
 
     Ok(())
 }
@@ -300,6 +303,7 @@ fn push_to_output(output: &mut Vec<String>, message: String, window: &mut Window
 
             window.scroll_ptr += 1;
         } else {
+            // Pad
             let pad = " ".repeat(window.w as usize - line.len());
             output.push(format!("{}{}", line, pad));
 
@@ -319,4 +323,16 @@ fn chat_window(stdout: &mut impl Write, chat: &[String], boundary: &Window) {
         let bytes = line.as_bytes();
         stdout.write(bytes.get(0..boundary.w as usize).unwrap_or(bytes)).unwrap();
     }
+}
+
+/// Clean up the terminal
+fn clean_up(stdout: &mut impl Write) {
+    let _ = terminal::disable_raw_mode().unwrap();
+    stdout.queue(Clear(ClearType::All)).unwrap();
+    stdout.queue(MoveTo(0, 0)).unwrap();
+
+    // Leave alternate screen
+    stdout.queue(LeaveAlternateScreen).unwrap();
+
+    stdout.flush().unwrap();
 }

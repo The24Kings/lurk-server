@@ -40,6 +40,7 @@ pub fn handle_client(stream: Arc<TcpStream>, messages: Sender<Message>, map_num:
     println!("[CLIENT]\tNew connection: {:?}", stream.peer_addr());
 
     // Send game information to the client
+    //FIXME: If the client disconnects before the game information is sent, the server will panic
     send_info(&stream, &messages, initial_points, stat_limit, map_num).map_err(|_err| {
         eprintln!("[CLIENT]\tError: Could not send game information to client");
     })?;
