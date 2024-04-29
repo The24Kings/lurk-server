@@ -10,7 +10,7 @@ use std::net::TcpStream;
 use crossterm::cursor::MoveTo;
 use crossterm::QueueableCommand;
 use std::io::{ stdout, Error, Read, Result, Write };
-use crossterm::terminal::{ self, Clear, ClearType };
+use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen };
 use crossterm::event::{ poll, read, Event, KeyCode, KeyModifiers };
 
 pub mod message;
@@ -68,6 +68,7 @@ fn main() -> Result<()> {
     let (mut w, mut h) = terminal::size().unwrap();
     let mut seperator = "=".repeat(w as usize);
     let mut prompt = String::new();
+    let user_input = "> ".to_string();
 
     let mut stop = false;
 
@@ -78,6 +79,9 @@ fn main() -> Result<()> {
         w,
         h: h - 2
     };
+
+    // Enter alternate screen
+    stdout().queue(EnterAlternateScreen).unwrap();
 
     // Clear the screen
     stdout().queue(Clear(ClearType::All)).unwrap();
@@ -94,6 +98,7 @@ fn main() -> Result<()> {
                 Event::Resize(nw, nh) => {
                     w = nw;
                     h = nh;
+
                     seperator = "=-".repeat(w as usize);
 
                     // Clear the screen
@@ -143,14 +148,14 @@ fn main() -> Result<()> {
                     Message::Game { author : _, message_type, initial_points, stat_limit, description_len: _, description } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
+                            format!("Type: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
                             &mut main_window
                         );
                     },
                     Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n", message_type, major_rev, minor_rev, extension_len), 
+                            format!("Type: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n\n", message_type, major_rev, minor_rev, extension_len), 
                             &mut main_window
                         );
                     }
@@ -176,6 +181,7 @@ fn main() -> Result<()> {
 
         // Move to input line
         stdout().queue(MoveTo(0, h-1)).unwrap();
+        stdout().write(user_input.as_bytes()).unwrap();
 
         let bytes = prompt.as_bytes();
         stdout().write(bytes.get(0..w as usize).unwrap_or(bytes)).unwrap();
@@ -183,13 +189,17 @@ fn main() -> Result<()> {
         // Flush the output
         stdout().flush().unwrap();
 
-        thread::sleep(Duration::from_millis(33));
+        thread::sleep(Duration::from_millis(50));
     };
 
     // Clean up
     let _ = terminal::disable_raw_mode().unwrap();
     stdout().queue(Clear(ClearType::All)).unwrap();
     stdout().queue(MoveTo(0, 0)).unwrap();
+
+    // Leave alternate screen
+    stdout().queue(LeaveAlternateScreen).unwrap();
+
     stdout().flush().unwrap();
 
     Ok(())
@@ -263,8 +273,7 @@ fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
             }
             _ => {}
         }
-    }
-    
+    }   
 }
 
 /// Push a message to the output buffer and break it up if it is too long (psuedo word wrap)

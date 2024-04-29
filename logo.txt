@@ -23,3 +23,6 @@ Lurk Knight Client written by Riley Ziegler 2024
 
 Use '/help' for a full list of all comamnds. Use '/create' to make a character and '/start' to begin
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+WARNING -> This client is still heavily under development <- WARNING
+
