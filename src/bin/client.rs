@@ -57,6 +57,13 @@ fn main() -> Result<()> {
     let _ = terminal::enable_raw_mode();
 
     let (mut w, mut h) = terminal::size().unwrap();
+
+    if w < 130 || h < 35 {
+        eprintln!("Error: Terminal must be at least 130x35");
+        clean_up(stdout().by_ref());
+
+        return Err(Error::new(io::ErrorKind::InvalidData, "Terminal must be at least 130x35"));
+    }
     
     let mut seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
     let mut prompt = String::new();
@@ -160,9 +167,9 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (MESSAGE)\n
-                                Author: {}\n
-                                Recipient: {}\n
+                                "\x1b[32mType\x1b[0m: {} (MESSAGE)\n\
+                                Author: {}\n\
+                                Recipient: {}\n\
                                 Message: {}\n\n", 
                                 message_type, sender, recipient, message
                             ), 
@@ -173,8 +180,8 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (ERROR)\n
-                                Error Code: {}\n
+                                "\x1b[32mType\x1b[0m: {} (ERROR)\n\
+                                Error Code: {}\n\
                                 Error Message: {}\n\n", 
                                 message_type, error, String::from_utf8(message).unwrap()
                             ), 
@@ -185,7 +192,7 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (ACCEPT)\n
+                                "\x1b[32mType\x1b[0m: {} (ACCEPT)\n\
                                 Accept Type: {}\n\n", 
                                 message_type, accept_type
                             ), 
@@ -196,9 +203,9 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (ROOM)\n
-                                Room Number: {}\n
-                                Room Name: {}\n
+                                "\x1b[32mType\x1b[0m: {} (ROOM)\n\
+                                Room Number: {}\n\
+                                Room Name: {}\n\
                                 Description: {}\n\n", 
                                 message_type, u16::from_le_bytes([room_number[0],room_number[1]]), String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
                             ), 
@@ -209,15 +216,15 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (CHARACTER)\n
-                                Name: {}\n
-                                Flags: {:#02x}\n
-                                Attack: {}\n
-                                Defense: {}\n
-                                Regen: {}\n
-                                Health: {}\n
-                                Gold: {}\n
-                                Current Room: {}\n
+                                "\x1b[32mType\x1b[0m: {} (CHARACTER)\n\
+                                Name: {}\n\
+                                Flags: {:#02x}\n\
+                                Attack: {}\n\
+                                Defense: {}\n\
+                                Regen: {}\n\
+                                Health: {}\n\
+                                Gold: {}\n\
+                                Current Room: {}\n\
                                 Description: {}\n\n", 
                                 message_type, name, flags, attack, defense, regen, health, gold, current_room, String::from_utf8(description).unwrap()
                             ), 
@@ -228,9 +235,9 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (GAME)\n
-                                Initial Points: {}\n
-                                Stat Limit: {}\n
+                                "\x1b[32mType\x1b[0m: {} (GAME)\n\
+                                Initial Points: {}\n\
+                                Stat Limit: {}\n\
                                 Description: {}\n\n", 
                                 message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()
                             ), 
@@ -241,9 +248,9 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (CONNECTION)\n
-                                Room Number: {}\n
-                                Room Name: {}\n
+                                "\x1b[32mType\x1b[0m: {} (CONNECTION)\n\
+                                Room Number: {}\n\
+                                Room Name: {}\n\
                                 Description: {}\n\n", 
                                 message_type, room_number, String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
                             ), 
@@ -254,9 +261,9 @@ fn main() -> Result<()> {
                         push_to_output(
                             &mut output, 
                             format!(
-                                "\x1b[32mType\x1b[0m: {} (VERSION)\n
-                                Major Revision: {}\n
-                                Minor Revision: {}\n
+                                "\x1b[32mType\x1b[0m: {} (VERSION)\n\
+                                Major Revision: {}\n\
+                                Minor Revision: {}\n\
                                 Extensions: {}\n\n", 
                                 message_type, major_rev, minor_rev, extension_len
                             ), 
