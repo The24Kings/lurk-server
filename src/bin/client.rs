@@ -92,7 +92,7 @@ fn main() -> Result<()> {
                 Event::Resize(nw, nh) => {
                     w = nw;
                     h = nh;
-                    seperator = "=".repeat(w as usize);
+                    seperator = "=-".repeat(w as usize);
 
                     // Clear the screen
                     stdout().queue(Clear(ClearType::All)).unwrap();
@@ -170,74 +170,76 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-//FIXME: Something causes this to panic and closes the channel
 /// Listen to the server for messages on a separate thread
 fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
     let mut reader = BufReader::new(stream.as_ref());
     let mut message_type = [0u8; 1];
 
-    reader.read_exact(&mut message_type).unwrap();
+    loop {
+        reader.read_exact(&mut message_type).unwrap();
 
-    match message_type[0] {
-        11 => {
-            // Game Message
-            let mut message = [0u8; 6];
-
-            // Read metadata
-            reader.read_exact(&mut message).unwrap();
-
-            let initial_points = u16::from_le_bytes([message[0], message[1]]);
-            let stat_limit = u16::from_le_bytes([message[2], message[3]]);
-            let desc_len = u16::from_le_bytes([message[4], message[5]]) as usize;
-            let mut desc = vec![0u8; desc_len];
-
-            // Read the description
-            reader.read_exact(&mut desc).unwrap();
-
-            let desc = String::from_utf8(desc).unwrap();
-
-            let _ = sender.send(
-                Message::Game {
-                    author: stream.clone(),
-                    message_type: 11,
-                    initial_points,
-                    stat_limit,
-                    description_len: desc_len as u16,
-                    description: desc.into_bytes()
+        match message_type[0] {
+            11 => {
+                // Game Message
+                let mut message = [0u8; 6];
+    
+                // Read metadata
+                reader.read_exact(&mut message).unwrap();
+    
+                let initial_points = u16::from_le_bytes([message[0], message[1]]);
+                let stat_limit = u16::from_le_bytes([message[2], message[3]]);
+                let desc_len = u16::from_le_bytes([message[4], message[5]]) as usize;
+                let mut desc = vec![0u8; desc_len];
+    
+                // Read the description
+                reader.read_exact(&mut desc).unwrap();
+    
+                let desc = String::from_utf8(desc).unwrap();
+    
+                let _ = sender.send(
+                    Message::Game {
+                        author: stream.clone(),
+                        message_type: 11,
+                        initial_points,
+                        stat_limit,
+                        description_len: desc_len as u16,
+                        description: desc.into_bytes()
+                    }
+                );
+            },
+            14 => {
+                // Version Message
+                let mut message = [0u8; 4];
+    
+                // Read metadata
+                reader.read_exact(&mut message).unwrap();
+    
+                let major = u8::from_le_bytes([message[0]]);
+                let minor = u8::from_le_bytes([message[1]]);
+                let ext_size = u16::from_le_bytes([message[2], message[3]]) as usize;
+    
+                if ext_size > 0 {
+                    let mut ext = vec![0u8; ext_size];
+    
+                    // Read the extensions
+                    reader.read_exact(&mut ext).unwrap();
                 }
-            );
-        },
-        14 => {
-            // Version Message
-            let mut message = [0u8; 4];
-
-            // Read metadata
-            reader.read_exact(&mut message).unwrap();
-
-            let major = u8::from_le_bytes([message[0]]);
-            let minor = u8::from_le_bytes([message[1]]);
-            let ext_size = u16::from_le_bytes([message[2], message[3]]) as usize;
-
-            if ext_size > 0 {
-                let mut ext = vec![0u8; ext_size];
-
-                // Read the extensions
-                reader.read_exact(&mut ext).unwrap();
+    
+                let _ = sender.send(
+                    Message::Version {
+                        author: stream.clone(),
+                        message_type: 14,
+                        major_rev: major,
+                        minor_rev: minor,
+                        extension_len: ext_size as u16,
+                        extensions: Vec::new()
+                    }
+                );
             }
-
-            let _ = sender.send(
-                Message::Version {
-                    author: stream.clone(),
-                    message_type: 14,
-                    major_rev: major,
-                    minor_rev: minor,
-                    extension_len: ext_size as u16,
-                    extensions: Vec::new()
-                }
-            );
+            _ => {}
         }
-        _ => {}
     }
+    
 }
 
 /// Push a message to the output buffer and break it up if it is too long (psuedo word wrap)
