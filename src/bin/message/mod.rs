@@ -289,7 +289,7 @@ pub enum Message {
         author: Arc<TcpStream>,
         message_type: u8,
         room_number: u16,
-        room_name: u16,
+        room_name: Vec<u8>,
         description_len: u16,
         description: Vec<u8>,
     },

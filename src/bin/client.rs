@@ -108,6 +108,8 @@ fn main() -> Result<()> {
                     w = nw;
                     h = nh;
 
+                    main_window.h = nh - 2;
+
                     seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
 
                     // Clear the screen
@@ -154,17 +156,110 @@ fn main() -> Result<()> {
         match message_receiver.try_recv() {
             Ok(message) => {
                 match message {
-                    Message::Game { author : _, message_type, initial_points, stat_limit, description_len: _, description } => {
+                    Message::Message { author: _, message_type, message_len: _, recipient, sender, message } => {
                         push_to_output(
                             &mut output, 
-                            format!("\x1b[32mType\x1b[0m: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (MESSAGE)\n
+                                Author: {}\n
+                                Recipient: {}\n
+                                Message: {}\n\n", 
+                                message_type, sender, recipient, message
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Error { author: _, message_type, error, message_len: _, message } => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (ERROR)\n
+                                Error Code: {}\n
+                                Error Message: {}\n\n", 
+                                message_type, error, String::from_utf8(message).unwrap()
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Accept { author: _, message_type, accept_type} => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (ACCEPT)\n
+                                Accept Type: {}\n\n", 
+                                message_type, accept_type
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Room { message_type, room_number, room_name, description_len: _, description } => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (ROOM)\n
+                                Room Number: {}\n
+                                Room Name: {}\n
+                                Description: {}\n\n", 
+                                message_type, u16::from_le_bytes([room_number[0],room_number[1]]), String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Character { author: _, message_type, name, flags, attack, defense, regen, health, gold, current_room, description_len: _, description } => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (CHARACTER)\n
+                                Name: {}\n
+                                Flags: {:#02x}\n
+                                Attack: {}\n
+                                Defense: {}\n
+                                Regen: {}\n
+                                Health: {}\n
+                                Gold: {}\n
+                                Current Room: {}\n
+                                Description: {}\n\n", 
+                                message_type, name, flags, attack, defense, regen, health, gold, current_room, String::from_utf8(description).unwrap()
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Game { author: _, message_type, initial_points, stat_limit, description_len: _, description } => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (GAME)\n
+                                Initial Points: {}\n
+                                Stat Limit: {}\n
+                                Description: {}\n\n", 
+                                message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()
+                            ), 
+                            &mut main_window
+                        );
+                    },
+                    Message::Connection { author: _, message_type, room_number, room_name, description_len: _, description } => {
+                        push_to_output(
+                            &mut output, 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (CONNECTION)\n
+                                Room Number: {}\n
+                                Room Name: {}\n
+                                Description: {}\n\n", 
+                                message_type, room_number, String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
+                            ), 
                             &mut main_window
                         );
                     },
                     Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
                         push_to_output(
                             &mut output, 
-                            format!("\x1b[32mType\x1b[0m: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n\n", message_type, major_rev, minor_rev, extension_len), 
+                            format!(
+                                "\x1b[32mType\x1b[0m: {} (VERSION)\n
+                                Major Revision: {}\n
+                                Minor Revision: {}\n
+                                Extensions: {}\n\n", 
+                                message_type, major_rev, minor_rev, extension_len
+                            ), 
                             &mut main_window
                         );
                     }
@@ -179,7 +274,7 @@ fn main() -> Result<()> {
                     return Err(Error::new(io::ErrorKind::Other, "Listening thread crashed"));
                 }
             }
-        }
+        };
 
         /* { Render the screen } */
         stdout().queue(Clear(ClearType::UntilNewLine)).unwrap();
@@ -194,6 +289,7 @@ fn main() -> Result<()> {
         stdout().queue(MoveTo(0, h-1)).unwrap();
         stdout().write(user_input.as_bytes()).unwrap();
 
+        // Write the prompt
         let bytes = prompt.as_bytes();
         stdout().write(bytes.get(0..w as usize).unwrap_or(bytes)).unwrap();
 
