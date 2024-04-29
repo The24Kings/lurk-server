@@ -19,6 +19,7 @@ pub mod error_code;
 use crate::message::Message;
 
 struct Window {
+    scroll_ptr: usize,
     x: u16,
     y: u16,
     w: u16,
@@ -70,7 +71,8 @@ fn main() -> Result<()> {
 
     let mut stop = false;
 
-    let main_window = Window {
+    let mut main_window = Window {
+        scroll_ptr: 0,
         x: 0,
         y: 0,
         w,
@@ -81,7 +83,7 @@ fn main() -> Result<()> {
     stdout().queue(Clear(ClearType::All)).unwrap();
 
     // Push the logo to the output buffer
-    push_to_output(&mut output, logo_txt, &main_window);
+    push_to_output(&mut output, logo_txt, &mut main_window);
 
     thread::spawn(move || listen_to_server(&stream, message_sender));
 
@@ -109,15 +111,23 @@ fn main() -> Result<()> {
                         },
                         KeyCode::Enter => {
                             //TODO: Process the type and send it to the server
-                            push_to_output(&mut output, prompt.clone(), &main_window);
+                            push_to_output(&mut output, prompt.clone(), &mut main_window);
+                            
+                            main_window.scroll_ptr = output.len();
                             prompt.clear();
                         },
                         KeyCode::Backspace => {
                             prompt.pop();
                         },
                         KeyCode::Up => {
-                            // Scroll up
-
+                            if main_window.scroll_ptr > (0 + main_window.h as usize) {
+                                main_window.scroll_ptr -= 1;
+                            }
+                        },
+                        KeyCode::Down => {
+                            if main_window.scroll_ptr < output.len() {
+                                main_window.scroll_ptr += 1;
+                            }
                         },
                         _ => {}
                     }
@@ -133,15 +143,15 @@ fn main() -> Result<()> {
                     Message::Game { author : _, message_type, initial_points, stat_limit, description_len: _, description } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type {}:\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
-                            &main_window
+                            format!("Type: {}\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
+                            &mut main_window
                         );
                     },
                     Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}:\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n", message_type, major_rev, minor_rev, extension_len), 
-                            &main_window
+                            format!("Type: {}\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n", message_type, major_rev, minor_rev, extension_len), 
+                            &mut main_window
                         );
                     }
                     _ => {}
@@ -158,7 +168,7 @@ fn main() -> Result<()> {
         /* { Render the screen } */
         stdout().queue(Clear(ClearType::UntilNewLine)).unwrap();
 
-        chat_window(&mut stdout(), &output, &main_window);
+        chat_window(&mut stdout(), &output[..main_window.scroll_ptr], &main_window);
 
         // Draw the seperator
         stdout().queue(MoveTo(0, h-2)).unwrap();
@@ -258,7 +268,7 @@ fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
 }
 
 /// Push a message to the output buffer and break it up if it is too long (psuedo word wrap)
-fn push_to_output(output: &mut Vec<String>, message: String, window: &Window) {
+fn push_to_output(output: &mut Vec<String>, message: String, window: &mut Window) {
     for line in message.lines() {
         // Break up the line if it is too long
         if line.len() > window.w as usize {
@@ -269,6 +279,8 @@ fn push_to_output(output: &mut Vec<String>, message: String, window: &Window) {
                 output.push(line.get(start..end).unwrap().to_string());
                 start = end;
                 end += window.w as usize;
+
+                window.scroll_ptr += 1;
             }
 
             // Pad the last line
@@ -276,15 +288,19 @@ fn push_to_output(output: &mut Vec<String>, message: String, window: &Window) {
             let pad = " ".repeat(window.w as usize - remaining.len());
 
             output.push(format!("{}{}", remaining, pad));
+
+            window.scroll_ptr += 1;
         } else {
             let pad = " ".repeat(window.w as usize - line.len());
             output.push(format!("{}{}", line, pad));
+
+            window.scroll_ptr += 1;
         }
     }
 }
 
 /// Draw the text in the chat window
-fn chat_window(stdout: &mut impl Write,  chat: &[String], boundary: &Window) {
+fn chat_window(stdout: &mut impl Write, chat: &[String], boundary: &Window) {
     let m = chat.len().checked_sub(boundary.h as usize).unwrap_or(0);
 
     for (i, line) in chat.iter().skip(m).enumerate() {
