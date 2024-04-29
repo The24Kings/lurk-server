@@ -109,7 +109,7 @@ fn main() -> Result<()> {
                         },
                         KeyCode::Enter => {
                             //TODO: Process the type and send it to the server
-                            output.push(prompt.clone());
+                            push_to_output(&mut output, prompt.clone(), &main_window);
                             prompt.clear();
                         },
                         KeyCode::Backspace => {
@@ -133,14 +133,14 @@ fn main() -> Result<()> {
                     Message::Game { author : _, message_type, initial_points, stat_limit, description_len: _, description } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type {}:\nInitial Points: {}\nStat Limit: {}\nDescription: {}", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
+                            format!("Type {}:\nInitial Points: {}\nStat Limit: {}\nDescription: {}\n", message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()), 
                             &main_window
                         );
                     },
-                    Message::Version { author: _, message_type, major_rev, minor_rev, extension_len: _, extensions } => {
+                    Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
                         push_to_output(
                             &mut output, 
-                            format!("Type: {}:\n\tMajor Revision: {}\n\tMinor Revision: {}\n\tExtensions: {:?}", message_type, major_rev, minor_rev, extensions), 
+                            format!("Type: {}:\nMajor Revision: {}\nMinor Revision: {}\nExtensions: {}\n", message_type, major_rev, minor_rev, extension_len), 
                             &main_window
                         );
                     }
@@ -156,9 +156,24 @@ fn main() -> Result<()> {
         }
 
         /* { Render the screen } */
-        render_screen(w, h, &output, &seperator, &prompt);
+        stdout().queue(Clear(ClearType::UntilNewLine)).unwrap();
 
-        thread::sleep(Duration::from_millis(1));
+        chat_window(&mut stdout(), &output, &main_window);
+
+        // Draw the seperator
+        stdout().queue(MoveTo(0, h-2)).unwrap();
+        stdout().write(seperator.as_bytes()).unwrap();
+
+        // Move to input line
+        stdout().queue(MoveTo(0, h-1)).unwrap();
+
+        let bytes = prompt.as_bytes();
+        stdout().write(bytes.get(0..w as usize).unwrap_or(bytes)).unwrap();
+
+        // Flush the output
+        stdout().flush().unwrap();
+
+        thread::sleep(Duration::from_millis(33));
     };
 
     // Clean up
@@ -256,9 +271,14 @@ fn push_to_output(output: &mut Vec<String>, message: String, window: &Window) {
                 end += window.w as usize;
             }
 
-            output.push(line.get(start..).unwrap().to_string());
+            // Pad the last line
+            let remaining = line.get(start..).unwrap();
+            let pad = " ".repeat(window.w as usize - remaining.len());
+
+            output.push(format!("{}{}", remaining, pad));
         } else {
-            output.push(line.to_string());
+            let pad = " ".repeat(window.w as usize - line.len());
+            output.push(format!("{}{}", line, pad));
         }
     }
 }
@@ -274,30 +294,4 @@ fn chat_window(stdout: &mut impl Write,  chat: &[String], boundary: &Window) {
         let bytes = line.as_bytes();
         stdout.write(bytes.get(0..boundary.w as usize).unwrap_or(bytes)).unwrap();
     }
-}
-
-/// Render the screen
-fn render_screen(w: u16, h: u16, output: &Vec<String>, seperator: &String, prompt: &String) {
-    // Clear the screen
-    stdout().queue(Clear(ClearType::UntilNewLine)).unwrap();
-
-    chat_window(&mut stdout(), output, &Window { 
-        x: 0,
-        y: 0, 
-        w, 
-        h: h-2 
-    });
-
-    // Draw the seperator
-    stdout().queue(MoveTo(0, h-2)).unwrap();
-    stdout().write(seperator.as_bytes()).unwrap();
-
-    // Move to input line
-    stdout().queue(MoveTo(0, h-1)).unwrap();
-
-    let bytes = prompt.as_bytes();
-    stdout().write(bytes.get(0..w as usize).unwrap_or(bytes)).unwrap();
-
-    // Flush the output
-    stdout().flush().unwrap();
 }
