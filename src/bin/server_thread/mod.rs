@@ -845,7 +845,7 @@ pub fn handle_server(message_receiver: Arc<Mutex<Receiver<Message>>>, map: &mut 
                     }
                 }
             },
-            Message::Version { author, message_type, major_rev, minor_rev, extention_len: _, extentions: _ } => {
+            Message::Version { author, message_type, major_rev, minor_rev, extention_len: _, extensions: _ } => {
                 println!("[SERVER]\tReceived version message from: {:?}", author.peer_addr());
 
                 let mut message: Vec<u8> = Vec::new();

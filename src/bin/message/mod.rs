@@ -1,7 +1,8 @@
 use std::sync::Arc;
 use std::net::TcpStream;
-use crate::error_code::ErrorCode;
 use std::fmt::{self, Display, Formatter};
+
+use crate::error_code::ErrorCode;
 
 pub enum Message {
     /// # Type 1
@@ -304,7 +305,7 @@ pub enum Message {
     /// 
     /// `extention_len`: 2 bytes - 3-4
     /// 
-    /// `extentions`: variable length - 5+
+    /// `extensions`: variable length - 5+
     /// 
     /// Sent by the server upon initial connection along with GAME. If no VERSION is received, the server can be assumed to support only LURK 2.0 or 2.1.
     /// 
@@ -317,7 +318,7 @@ pub enum Message {
         major_rev: u8,
         minor_rev: u8,
         extention_len: u16, // Can be 0, just ignore
-        extentions: Vec<u8>, // 0-1 length, 2-+ first extention;
+        extensions: Vec<u8>, // 0-1 length, 2-+ first extention;
     }
 }
 
@@ -363,8 +364,8 @@ impl Display for Message {
             Message::Connection { author, message_type, room_number, room_name, description_len, description } => {
                 write!(f, "Connection {{ author: {:?}, message_type: {}, room_number: {:?}, room_name: {:?}, description_len: {:?}, description: {:?} }}", author, message_type, room_number, room_name, description_len, description)
             },
-            Message::Version { author, message_type, major_rev, minor_rev, extention_len, extentions } => {
-                write!(f, "Version {{ author: {:?}, message_type: {}, major_rev: {}, minor_rev: {}, extention_len: {:?}, extentions: {:?} }}", author, message_type, major_rev, minor_rev, extention_len, extentions)
+            Message::Version { author, message_type, major_rev, minor_rev, extention_len, extensions } => {
+                write!(f, "Version {{ author: {:?}, message_type: {}, major_rev: {}, minor_rev: {}, extention_len: {:?}, extensions: {:?} }}", author, message_type, major_rev, minor_rev, extention_len, extensions)
             }
         }
     }

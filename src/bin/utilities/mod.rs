@@ -367,7 +367,7 @@ pub fn send_info(stream: &Arc<TcpStream>, messages: &Sender<Message>, initial_po
         major_rev: 2,
         minor_rev: 3,
         extention_len: 0,
-        extentions: Vec::new()
+        extensions: Vec::new()
     };
 
     messages.send(version_message).map_err(|err| {
