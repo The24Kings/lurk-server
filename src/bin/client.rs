@@ -1,17 +1,17 @@
 use std::io;
 use std::env;
-use std::sync::mpsc::{ channel, Sender };
 use std::sync::Arc;
 use std::thread;
 use std::fs::File;
 use std::io::BufReader;
-use std::time::Duration;
+use std::time::{ Duration, Instant };
 use std::net::TcpStream;
-use crossterm::cursor::MoveTo;
+use crossterm::cursor::{ MoveTo, Hide, Show };
 use crossterm::QueueableCommand;
+use std::sync::mpsc::{ channel, Sender };
 use std::io::{ stdout, Error, Read, Result, Write };
-use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen };
 use crossterm::event::{ poll, read, Event, KeyCode, KeyModifiers };
+use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen };
 
 pub mod message;
 pub mod error_code;
@@ -67,9 +67,16 @@ fn main() -> Result<()> {
     
     let mut seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
     let mut prompt = String::new();
-    let user_input = "\x1b[36m> \x1b[0m ".to_string();
+    let mut user_input = "\x1b[36m> \x1b[0m ".to_string();
+    let temp_input = "\x1b[36m> \x1b[0m ".to_string();
+    let blank_input = "   ".to_string();
+
+    let mut start_time = Instant::now();
+    let mut check_time: Duration;
+    let blink_delay = Duration::from_millis(500);
 
     let mut stop = false;
+    let mut blink = false;
 
     let mut main_window = Window {
         scroll_ptr: 0,
@@ -97,6 +104,7 @@ fn main() -> Result<()> {
     }
 
     // Clear the screen
+    stdout().queue(Hide).unwrap();
     stdout().queue(Clear(ClearType::All)).unwrap();
 
     // Push the logo to the output buffer
@@ -303,6 +311,21 @@ fn main() -> Result<()> {
         // Flush the output
         stdout().flush().unwrap();
 
+        // Check how much time has passed
+        check_time = start_time.elapsed();
+
+        // Blink the cursor
+        if check_time >= blink_delay {
+            blink = !blink;
+            start_time = Instant::now();
+        } 
+
+        if blink {
+            user_input = blank_input.clone();
+        } else {
+            user_input = temp_input.clone();
+        }
+
         thread::sleep(Duration::from_millis(50));
     };
 
@@ -431,6 +454,7 @@ fn chat_window(stdout: &mut impl Write, chat: &[String], boundary: &Window) {
 /// Clean up the terminal
 fn clean_up(stdout: &mut impl Write) {
     let _ = terminal::disable_raw_mode().unwrap();
+    stdout.queue(Show).unwrap();
     stdout.queue(Clear(ClearType::All)).unwrap();
     stdout.queue(MoveTo(0, 0)).unwrap();
 
