@@ -3,6 +3,7 @@ use std::env;
 use std::thread;
 use std::fs::File;
 use std::sync::Arc;
+use dotenv::dotenv;
 use std::io::BufReader;
 use std::net::TcpStream;
 use crossterm::QueueableCommand;
@@ -29,6 +30,19 @@ struct Window {
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
+    match dotenv().ok() {
+        Some(_) => {},
+        None => {
+            eprintln!("Error: Could not load .env file");
+            return Err(Error::new(io::ErrorKind::InvalidData, "Could not load .env file"));
+        }
+    }
+
+    // Load environment variables
+    let logo_path = env::var("LOGO_PATH").expect("LOGO_PATH must be set");
+    let min_width = env::var("MIN_WIDTH").expect("MIN_WIDTH must be set").parse::<u16>().expect("MIN_WIDTH must be a number");
+    let min_height = env::var("MIN_HEIGHT").expect("MIN_HEIGHT must be set").parse::<u16>().expect("MIN_HEIGHT must be a number");
+
     if args.len() != 3 {
         eprintln!("Usage:\n\t\tlurkKnight <address> <port>");
         return Err(Error::new(io::ErrorKind::InvalidInput, "Invalid number of arguments"));
@@ -41,7 +55,7 @@ fn main() -> Result<()> {
     let (message_sender, message_receiver) = channel();
 
     // Load Logo
-    let mut logo = File::open("/home/rjziegler/spring2024/cs435/lurk_server/logo.txt").map_err(|err| {
+    let mut logo = File::open(logo_path).map_err(|err| {
         eprintln!("Error: Could not read logo file: {}", err);
 
         io::Error::new(io::ErrorKind::InvalidData, "Could not read logo file")
@@ -49,6 +63,14 @@ fn main() -> Result<()> {
 
     let mut logo_txt = String::new();
     logo.read_to_string(&mut logo_txt).expect("Could not read logo file");
+
+    // Get the terminal size
+    let (mut w, mut h) = terminal::size().unwrap();
+
+    if w < min_width || h < min_height {
+        clean_up(stdout().by_ref());
+        return Err(Error::new(io::ErrorKind::InvalidData, format!("Terminal must be at least {}x{}", min_width, min_height)));
+    }
 
     // Output buffer
     let mut output: Vec<String> = Vec::new();
@@ -58,15 +80,6 @@ fn main() -> Result<()> {
     stdout().queue(DisableLineWrap).unwrap();
     stdout().queue(Hide).unwrap();
     let _ = terminal::enable_raw_mode();
-
-    let (mut w, mut h) = terminal::size().unwrap();
-
-    if w < 130 || h < 35 {
-        eprintln!("Error: Terminal must be at least 130x35");
-        clean_up(stdout().by_ref());
-
-        return Err(Error::new(io::ErrorKind::InvalidData, "Terminal must be at least 130x35"));
-    }
     
     let mut seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
     let mut prompt = String::new();

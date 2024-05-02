@@ -6,3 +6,7 @@
 description1.txt
 map1.json
 start.sh
+build.sh
+
+# Secrets/ file paths
+.env
