@@ -1,17 +1,17 @@
 use std::io;
 use std::env;
-use std::sync::Arc;
 use std::thread;
 use std::fs::File;
+use std::sync::Arc;
 use std::io::BufReader;
-use std::time::{ Duration, Instant };
 use std::net::TcpStream;
-use crossterm::cursor::{ MoveTo, Hide, Show };
 use crossterm::QueueableCommand;
+use std::time::{ Duration, Instant };
 use std::sync::mpsc::{ channel, Sender };
+use crossterm::cursor::{ MoveTo, Hide, Show };
 use std::io::{ stdout, Error, Read, Result, Write };
 use crossterm::event::{ poll, read, Event, KeyCode, KeyModifiers };
-use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen };
+use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, DisableLineWrap };
 
 pub mod message;
 pub mod error_code;
@@ -43,6 +43,7 @@ fn main() -> Result<()> {
     // Load Logo
     let mut logo = File::open("/home/rjziegler/spring2024/cs435/lurk_server/logo.txt").map_err(|err| {
         eprintln!("Error: Could not read logo file: {}", err);
+
         io::Error::new(io::ErrorKind::InvalidData, "Could not read logo file")
     })?;
 
@@ -54,6 +55,8 @@ fn main() -> Result<()> {
     
     // Set up the terminal
     stdout().queue(EnterAlternateScreen).unwrap();
+    stdout().queue(DisableLineWrap).unwrap();
+    stdout().queue(Hide).unwrap();
     let _ = terminal::enable_raw_mode();
 
     let (mut w, mut h) = terminal::size().unwrap();
@@ -67,9 +70,13 @@ fn main() -> Result<()> {
     
     let mut seperator = "\x1b[32m=\x1b[0m".repeat(w as usize);
     let mut prompt = String::new();
-    let mut user_input = "\x1b[36m> \x1b[0m ".to_string();
-    let temp_input = "\x1b[36m> \x1b[0m ".to_string();
-    let blank_input = "   ".to_string();
+
+    // Initialize the input line
+    let mut user_input = "\x1b[36m>\x1b[0m ".to_string();
+    let temp_input = user_input.clone();
+    let blank_input = "  ".to_string();
+
+    let mut input_prompt = "Type: ".to_string();
 
     let mut start_time = Instant::now();
     let mut check_time: Duration;
@@ -104,14 +111,15 @@ fn main() -> Result<()> {
     }
 
     // Clear the screen
-    stdout().queue(Hide).unwrap();
     stdout().queue(Clear(ClearType::All)).unwrap();
 
     // Push the logo to the output buffer
     push_to_output(&mut output, logo_txt, &mut main_window);
 
     // TODO: Remove this later -> Warning
-    push_to_output(&mut output, String::from("\x1b[31mWARNING\x1b[0m -> \x1b[4mThis client is still heavily under development\x1b[0m <- \x1b[31mWARNING\x1b[0m\n\n"), &mut main_window);
+    push_to_output(&mut output, 
+        String::from("\x1b[31mWARNING\x1b[0m -> \x1b[4mThis client is still heavily under development\x1b[0m <- \x1b[31mWARNING\x1b[0m\n\n"
+    ), &mut main_window);
 
     thread::spawn(move || listen_to_server(&stream, message_sender));
 
@@ -142,6 +150,9 @@ fn main() -> Result<()> {
                         },
                         KeyCode::Enter => {
                             //TODO: Process the type and send it to the server
+                            // Check which type was inputed; put into message input based on type.
+                            // Count based on what the type inputs are required to keep track of
+                            // which prompt to give.
                             push_to_output(&mut output, prompt.clone(), &mut main_window);
                             
                             main_window.scroll_ptr = output.len();
@@ -172,111 +183,79 @@ fn main() -> Result<()> {
             Ok(message) => {
                 match message {
                     Message::Message { author: _, message_type, message_len: _, recipient, sender, message } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (MESSAGE)\n\
-                                Author: {}\n\
-                                Recipient: {}\n\
-                                Message: {}\n\n", 
-                                message_type, sender, recipient, message
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (MESSAGE)\n\
+                            Author: {}\n\
+                            Recipient: {}\n\
+                            Message: {}\n\n", 
+                            message_type, sender, recipient, message
+                        ), &mut main_window);
                     },
                     Message::Error { author: _, message_type, error, message_len: _, message } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (ERROR)\n\
-                                Error Code: {}\n\
-                                Error Message: {}\n\n", 
-                                message_type, error, String::from_utf8(message).unwrap()
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (ERROR)\n\
+                            Error Code: {}\n\
+                            Error Message: {}\n\n", 
+                            message_type, error, String::from_utf8(message).unwrap()
+                        ), &mut main_window);
                     },
                     Message::Accept { author: _, message_type, accept_type} => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (ACCEPT)\n\
-                                Accept Type: {}\n\n", 
-                                message_type, accept_type
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (ACCEPT)\n\
+                            Accept Type: {}\n\n", 
+                            message_type, accept_type
+                        ), &mut main_window);
                     },
                     Message::Room { message_type, room_number, room_name, description_len: _, description } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (ROOM)\n\
-                                Room Number: {}\n\
-                                Room Name: {}\n\
-                                Description: {}\n\n", 
-                                message_type, u16::from_le_bytes([room_number[0],room_number[1]]), String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (ROOM)\n\
+                            Room Number: {}\n\
+                            Room Name: {}\n\
+                            Description: {}\n\n", 
+                            message_type, u16::from_le_bytes([room_number[0],room_number[1]]), String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
+                        ), &mut main_window);
                     },
                     Message::Character { author: _, message_type, name, flags, attack, defense, regen, health, gold, current_room, description_len: _, description } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (CHARACTER)\n\
-                                Name: {}\n\
-                                Flags: {:#02x}\n\
-                                Attack: {}\n\
-                                Defense: {}\n\
-                                Regen: {}\n\
-                                Health: {}\n\
-                                Gold: {}\n\
-                                Current Room: {}\n\
-                                Description: {}\n\n", 
-                                message_type, name, flags, attack, defense, regen, health, gold, current_room, String::from_utf8(description).unwrap()
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (CHARACTER)\n\
+                            Name: {}\n\
+                            Flags: {:#02x}\n\
+                            Attack: {}\n\
+                            Defense: {}\n\
+                            Regen: {}\n\
+                            Health: {}\n\
+                            Gold: {}\n\
+                            Current Room: {}\n\
+                            Description: {}\n\n", 
+                            message_type, name, flags, attack, defense, regen, health, gold, current_room, String::from_utf8(description).unwrap()
+                        ), &mut main_window);
                     },
                     Message::Game { author: _, message_type, initial_points, stat_limit, description_len: _, description } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (GAME)\n\
-                                Initial Points: {}\n\
-                                Stat Limit: {}\n\
-                                Description: {}\n\n", 
-                                message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (GAME)\n\
+                            Initial Points: {}\n\
+                            Stat Limit: {}\n\
+                            Description: {}\n\n", 
+                            message_type, initial_points, stat_limit, String::from_utf8(description).unwrap()
+                        ), &mut main_window);
                     },
                     Message::Connection { author: _, message_type, room_number, room_name, description_len: _, description } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (CONNECTION)\n\
-                                Room Number: {}\n\
-                                Room Name: {}\n\
-                                Description: {}\n\n", 
-                                message_type, room_number, String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (CONNECTION)\n\
+                            Room Number: {}\n\
+                            Room Name: {}\n\
+                            Description: {}\n\n", 
+                            message_type, room_number, String::from_utf8(room_name).unwrap(), String::from_utf8(description).unwrap()
+                        ), &mut main_window);
                     },
                     Message::Version { author: _, message_type, major_rev, minor_rev, extension_len, extensions: _ } => {
-                        push_to_output(
-                            &mut output, 
-                            format!(
-                                "\x1b[32mType\x1b[0m: {} (VERSION)\n\
-                                Major Revision: {}\n\
-                                Minor Revision: {}\n\
-                                Extensions: {}\n\n", 
-                                message_type, major_rev, minor_rev, extension_len
-                            ), 
-                            &mut main_window
-                        );
+                        push_to_output(&mut output, format!(
+                            "\x1b[32mType\x1b[0m: {} (VERSION)\n\
+                            Major Revision: {}\n\
+                            Minor Revision: {}\n\
+                            Extensions: {}\n\n", 
+                            message_type, major_rev, minor_rev, extension_len
+                        ), &mut main_window); 
                     }
                     _ => {}
                 }
@@ -294,7 +273,7 @@ fn main() -> Result<()> {
         /* { Render the screen } */
         stdout().queue(Clear(ClearType::UntilNewLine)).unwrap();
 
-        chat_window(&mut stdout(), &output[..main_window.scroll_ptr], &main_window);
+        chat_window(&mut stdout(), &output[..main_window.scroll_ptr], &mut main_window);
 
         // Draw the seperator
         stdout().queue(MoveTo(0, h-2)).unwrap();
@@ -302,11 +281,17 @@ fn main() -> Result<()> {
 
         // Move to input line
         stdout().queue(MoveTo(0, h-1)).unwrap();
+        stdout().write(input_prompt.as_bytes()).unwrap();
         stdout().write(user_input.as_bytes()).unwrap();
 
         // Write the prompt
         let bytes = prompt.as_bytes();
-        stdout().write(bytes.get(0..w as usize).unwrap_or(bytes)).unwrap();
+        let excess_prompt: usize;
+
+        // Slide the prompt if it is too long
+        if bytes.len() - w as usize > 0 { excess_prompt = bytes.len() - w as usize; } else { excess_prompt = 0; }
+
+        stdout().write(bytes.get(0 + excess_prompt..w as usize + excess_prompt).unwrap_or(bytes)).unwrap();
 
         // Flush the output
         stdout().flush().unwrap();
@@ -334,6 +319,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+//TODO: Implement the rest of the message types
 /// Listen to the server for messages on a separate thread
 fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
     let mut reader = BufReader::new(stream.as_ref());
@@ -343,6 +329,21 @@ fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
         reader.read_exact(&mut message_type).unwrap();
 
         match message_type[0] {
+            1 => {
+
+            },
+            7 => {
+
+            },
+            8 => {
+
+            },
+            9 => {
+
+            },
+            10 => {
+
+            },
             11 => {
                 // Game Message
                 let mut message = [0u8; 6];
@@ -370,6 +371,9 @@ fn listen_to_server(stream: &Arc<TcpStream>, sender: Sender<Message>) {
                         description: desc.into_bytes()
                     }
                 );
+            },
+            13 => {
+                
             },
             14 => {
                 // Version Message
@@ -450,6 +454,7 @@ fn chat_window(stdout: &mut impl Write, chat: &[String], boundary: &Window) {
         stdout.write(bytes.get(0..boundary.w as usize).unwrap_or(bytes)).unwrap();
     }
 }
+
 
 /// Clean up the terminal
 fn clean_up(stdout: &mut impl Write) {
