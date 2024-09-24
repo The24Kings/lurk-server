@@ -1,5 +1,6 @@
 use std::io::{prelude::*, BufReader};
 use std::net::TcpStream;
+use std::env;
 use std::sync::Arc;
 use std::result;
 use std::fs::File;
@@ -65,9 +66,12 @@ pub fn handle_client(stream: Arc<TcpStream>, messages: Sender<Message>, map_num:
     messages.send(version_message).map_err(|err| {
         eprintln!("[CLIENT]\tError: Could not send version message to server: {}", err);
     })?;
+    
+    // Load environment variables
+    let desc_path = env::var("DESC_PATH").expect("DESC_PATH must be set");
 
     // Send the description message
-    let mut description_file = File::open(format!("/home/rjziegler/spring24/cs435/lurk_server/description{}.txt", map_num)).map_err(|err| {
+    let mut description_file = File::open(format!("{}{}.txt", desc_path, map_num)).map_err(|err| {
         eprintln!("[CLIENT]\tError: Could not read description file: {}", err);
     })?;
 

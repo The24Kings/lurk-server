@@ -1,4 +1,5 @@
 use std::sync::mpsc::channel;
+use dotenv::dotenv;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 use std::fs::File;
@@ -46,8 +47,19 @@ fn main() -> Result<()> {
 
     let message_receiver = Arc::new(Mutex::new(message_receiver));
 
+    match dotenv().ok() {
+        Some(_) => {},
+        None => {
+            eprintln!("Error: Could not load .env file");
+            return Err(());
+        }
+    }
+
+    // Load environment variables
+    let map_path = env::var("MAP_PATH").expect("MAP_PATH must be set");
+
     //Build the game map
-    let map_file = File::open(format!("/home/rjziegler/spring24/cs435/lurk_server/map{}.json", map_num)).map_err(|err| {
+    let map_file = File::open(format!("{}{}.json",map_path, map_num)).map_err(|err| {
         eprintln!("[MAIN]\t\tError: Could not read map file: {}", err);
     })?;
 
