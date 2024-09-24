@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     let message_receiver = Arc::new(Mutex::new(message_receiver));
 
     //Build the game map
-    let map_file = File::open(format!("/home/rjziegler/spring2024/cs435/lurk_server/map{}.json", map_num)).map_err(|err| {
+    let map_file = File::open(format!("/home/rjziegler/spring24/cs435/lurk_server/map{}.json", map_num)).map_err(|err| {
         eprintln!("[MAIN]\t\tError: Could not read map file: {}", err);
     })?;
 

@@ -2,13 +2,12 @@ use std::io::{prelude::*, BufReader};
 use std::net::TcpStream;
 use std::sync::Arc;
 use std::result;
+use std::fs::File;
 use std::sync::mpsc::Sender;
 
 use crate::message::Message;
 use crate::error_code::ErrorCode;
 use crate::character::Character;
-
-use crate::utilities::send_info;
 
 type Result<T> = result::Result<T, ()>;
 
@@ -37,12 +36,58 @@ pub fn handle_client(stream: Arc<TcpStream>, messages: Sender<Message>, map_num:
     }
 
     // New character Connected
-    println!("[CLIENT]\tNew connection: {:?}", stream.peer_addr());
+        match stream.peer_addr() {
+        Ok(addr) => {
+            println!("[CLIENT]\tNew character connected: {}", addr);
+        },
+        Err(_) => {
+            eprintln!("[CLIENT]\tError: Could not get peer address of client; shutting down process.");
+            return Err(());
+        }
+    }
 
-    // Send game information to the client
-    //FIXME: If the client disconnects before the game information is sent, the server will panic
-    send_info(&stream, &messages, initial_points, stat_limit, map_num).map_err(|_err| {
-        eprintln!("[CLIENT]\tError: Could not send game information to client");
+    /*
+        // Send game information to the client
+        send_info(&stream, &messages, initial_points, stat_limit, map_num).map_err(|_err| {
+            eprintln!("[CLIENT]\tError: Could not send game information to client");
+        })?;
+    */
+    // Send the version message and description
+    let version_message = Message::Version {
+        author: stream.clone(),
+        message_type: 14,
+        major_rev: 2,
+        minor_rev: 3,
+        extension_len: 0,
+        extensions: Vec::new()
+    };
+
+    messages.send(version_message).map_err(|err| {
+        eprintln!("[CLIENT]\tError: Could not send version message to server: {}", err);
+    })?;
+
+    // Send the description message
+    let mut description_file = File::open(format!("/home/rjziegler/spring24/cs435/lurk_server/description{}.txt", map_num)).map_err(|err| {
+        eprintln!("[CLIENT]\tError: Could not read description file: {}", err);
+    })?;
+
+    let mut description = String::new();
+
+    description_file.read_to_string(&mut description).map_err(|err| {
+        eprintln!("[CLIENT]\tError: Could not read description file: {}", err);
+    })?;
+    
+    let description_message = Message::Game {
+        author: stream.clone(),
+        message_type: 11,
+        initial_points,
+        stat_limit,
+        description_len: description.len() as u16,
+        description: description.as_bytes().to_vec()
+    };
+
+    messages.send(description_message).map_err(|err| {
+        eprintln!("[CLIENT]\tError: Could not send description message to server: {}", err);
     })?;
 
     // Listen for messages

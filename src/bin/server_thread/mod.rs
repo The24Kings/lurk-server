@@ -797,7 +797,26 @@ pub fn handle_server(message_receiver: Arc<Mutex<Receiver<Message>>>, map: &mut 
                 })?;
             },
             Message::Game { author, message_type, initial_points, stat_limit, description_len, description } => {
-                println!("[SERVER]\tReceived game message from: {:?}", author.peer_addr());
+                match author.as_ref().peer_addr() {
+                    Ok(addr) => {
+                        println!("[SERVER]\tReceived game message from: {:?}", addr);
+                    },
+                    Err(err) => {
+                        eprintln!("[SERVER]\tError: Could not get address of author: {}", err);
+
+                        // Disconnect the client
+                        match author.shutdown(std::net::Shutdown::Both) {
+                            Ok(_) => {
+                                println!("[SERVER]\tDisconnected Client");
+                            },
+                            Err(err) => {
+                                eprintln!("[SERVER]\tError: Could not disconnect client: {}", err);
+                            }
+                        }
+
+                        continue;
+                    }
+                }
 
                 let mut message: Vec<u8> = Vec::new();
 
@@ -846,7 +865,26 @@ pub fn handle_server(message_receiver: Arc<Mutex<Receiver<Message>>>, map: &mut 
                 }
             },
             Message::Version { author, message_type, major_rev, minor_rev, extension_len: _, extensions: _ } => {
-                println!("[SERVER]\tReceived version message from: {:?}", author.peer_addr());
+                match author.as_ref().peer_addr() {
+                    Ok(addr) => {
+                        println!("[SERVER]\tReceived version message from: {:?}", addr);
+                    },
+                    Err(err) => {
+                        eprintln!("[SERVER]\tError: Could not get address of author: {}", err);
+
+                        // Disconnect the client
+                        match author.shutdown(std::net::Shutdown::Both) {
+                            Ok(_) => {
+                                println!("[SERVER]\tDisconnected Client");
+                            },
+                            Err(err) => {
+                                eprintln!("[SERVER]\tError: Could not disconnect client: {}", err);
+                            }
+                        }
+
+                        continue;
+                    }
+                }
 
                 let mut message: Vec<u8> = Vec::new();
 

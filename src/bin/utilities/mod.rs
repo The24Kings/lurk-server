@@ -1,12 +1,9 @@
 use std::io::prelude::*;
-use std::sync::mpsc::Sender;
 use std::result;
 use std::sync::Arc;
 use std::net::TcpStream;
 use serde_json::Value;
-use std::fs::File;
 
-use crate::message::Message;
 use crate::character::Character;
 use crate::monster::Monster;
 
@@ -354,51 +351,6 @@ pub fn send_connections(author: &Arc<TcpStream>, map: &Value, room_num: usize) -
             eprintln!("[UTILS]\t\tError: Could not send room message to character: {}", err);
         })?;
     }
-
-    Ok(())
-}
-
-/// Send the client the version and description of the game
-pub fn send_info(stream: &Arc<TcpStream>, messages: &Sender<Message>, initial_points: u16, stat_limit: u16, map_num: u8) -> Result<()> {
-    // Send the version message and description
-    let version_message = Message::Version {
-        author: stream.clone(),
-        message_type: 14,
-        major_rev: 2,
-        minor_rev: 3,
-        extension_len: 0,
-        extensions: Vec::new()
-    };
-
-    messages.send(version_message).map_err(|err| {
-        eprintln!("[UTILS]\t\tError: Could not send version message to server: {}", err);
-
-        std::process::exit(1);
-    })?;
-
-    // Send the description message
-    let mut description_file = File::open(format!("/home/rjziegler/spring2024/cs435/lurk_server/description{}.txt", map_num)).map_err(|err| {
-        eprintln!("[UTILS]\t\tError: Could not read description file: {}", err);
-    })?;
-
-    let mut description = String::new();
-
-    description_file.read_to_string(&mut description).map_err(|err| {
-        eprintln!("[UTILS]\t\tError: Could not read description file: {}", err);
-    })?;
-    
-    let description_message = Message::Game {
-        author: stream.clone(),
-        message_type: 11,
-        initial_points,
-        stat_limit,
-        description_len: description.len() as u16,
-        description: description.as_bytes().to_vec()
-    };
-
-    messages.send(description_message).map_err(|err| {
-        eprintln!("[UTILS]\t\tError: Could not send description message to server: {}", err);
-    })?;
 
     Ok(())
 }
