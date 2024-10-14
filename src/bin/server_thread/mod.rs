@@ -829,6 +829,12 @@ pub fn handle_server(message_receiver: Arc<Mutex<Receiver<Message>>>, map: &mut 
                 // Send the game message to the author
                 author.as_ref().write_all(&message).map_err(|err| {
                     eprintln!("[SERVER]\tError: Could not send game message to character: {}", err);
+
+                    // If Error is os 104; connection reset by peer, panic
+                    if err.raw_os_error().unwrap_or(0) == 104 {
+                        eprintln!("[SERVER]\tError: Connection reset by peer");
+                        std::process::exit(1);
+                    }
                 })?;
             },
             Message::Leave { author, message_type: _ } => {
@@ -896,6 +902,12 @@ pub fn handle_server(message_receiver: Arc<Mutex<Receiver<Message>>>, map: &mut 
                 // Send the version to the author
                 author.as_ref().write_all(&message).map_err(|err| {
                     eprintln!("[SERVER]\tError: Could not send version message to character: {}", err);
+
+                    // If Error is os 104; connection reset by peer, panic
+                    if err.raw_os_error().unwrap_or(0) == 104 {
+                        eprintln!("[SERVER]\tError: Connection reset by peer");
+                        std::process::exit(1);
+                    }
                 })?;
             },
             _ => {

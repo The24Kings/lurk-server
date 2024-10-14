@@ -4,7 +4,7 @@ use std::env;
 use std::sync::Arc;
 use std::result;
 use std::fs::File;
-use std::sync::mpsc::Sender;
+use std::sync::mpsc::SyncSender;
 
 use crate::message::Message;
 use crate::error_code::ErrorCode;
@@ -12,7 +12,7 @@ use crate::character::Character;
 
 type Result<T> = result::Result<T, ()>;
 
-pub fn handle_client(stream: Arc<TcpStream>, messages: Sender<Message>, map_num: u8) -> Result<()> {
+pub fn handle_client(stream: Arc<TcpStream>, messages: SyncSender<Message>, map_num: u8) -> Result<()> {
     let mut reader = BufReader::new(stream.as_ref());
 
     let mut message_type = [0u8];
@@ -65,6 +65,7 @@ pub fn handle_client(stream: Arc<TcpStream>, messages: Sender<Message>, map_num:
 
     messages.send(version_message).map_err(|err| {
         eprintln!("[CLIENT]\tError: Could not send version message to server: {}", err);
+        return;
     })?;
     
     // Load environment variables

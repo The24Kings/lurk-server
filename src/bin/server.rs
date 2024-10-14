@@ -1,4 +1,4 @@
-use std::sync::mpsc::channel;
+use std::sync::mpsc::sync_channel;
 use dotenv::dotenv;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
@@ -33,9 +33,7 @@ fn main() -> Result<()> {
     }
 
     let address = format!("{}:{}", args[1], args[2]);
-    let map_num = args[3].parse::<u8>().map_err(|err| {
-        eprintln!("[MAIN]\t\tError: Could not parse map number: {}", err);
-    })?;
+    let map_num = args[3].parse::<u8>().unwrap_or(1);
 
     let listener = TcpListener::bind(&address).map_err(|_err| {
         eprintln!("[MAIN]\t\tError: Could not bind to address {address}");
@@ -43,7 +41,7 @@ fn main() -> Result<()> {
 
     println!("Listening on {address}");
 
-    let (message_sender, message_receiver) = channel();
+    let (message_sender, message_receiver) = sync_channel(0); // Create a synchronous channel
 
     let message_receiver = Arc::new(Mutex::new(message_receiver));
 
@@ -86,7 +84,7 @@ fn main() -> Result<()> {
     
     // Spawn server thread
     println!("[MAIN]\t\tSpawning server thread");
-    thread::spawn(move || handle_server(message_receiver, &mut map, &mut monsters));
+    thread::spawn(move || handle_server(message_receiver, &mut map, &mut monsters)); //FIXME: Somewhere the channel is being closed before the server thread is done
 
     // Listen to incoming connections
     for stream in listener.incoming() {
