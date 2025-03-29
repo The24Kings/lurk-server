@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::net::TcpStream;
 use std::fmt::{self, Display, Formatter};
 
-use crate::error_code::ErrorCode;
+use crate::protocol::error_code::ErrorCode;
 
 pub enum Message {
     /// # Type 1

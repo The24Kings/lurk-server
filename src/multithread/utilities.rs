@@ -4,8 +4,8 @@ use std::sync::Arc;
 use std::net::TcpStream;
 use serde_json::Value;
 
-use crate::character::Character;
-use crate::monster::Monster;
+use crate::protocol::character::Character;
+use crate::protocol::monster::Monster;
 
 type Result<T> = result::Result<T, ()>;
 

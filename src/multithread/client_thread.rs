@@ -6,9 +6,9 @@ use std::result;
 use std::fs::File;
 use std::sync::mpsc::SyncSender;
 
-use crate::message::Message;
-use crate::error_code::ErrorCode;
-use crate::character::Character;
+use crate::protocol::message::Message;
+use crate::protocol::error_code::ErrorCode;
+use crate::protocol::character::Character;
 
 type Result<T> = result::Result<T, ()>;
 

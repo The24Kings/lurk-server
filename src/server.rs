@@ -6,18 +6,13 @@ use std::fs::File;
 use std::{env, result, thread};
 use serde_json::Value;
 
-// Self-made modules
-pub mod error_code;
-pub mod message;
-pub mod character;
-pub mod monster;
-pub mod client_thread;
-pub mod server_thread;
-pub mod utilities;
+use crate::multithread::client_thread::handle_client;
+use crate::multithread::server_thread::handle_server;
+use crate::protocol::monster::Monster;
 
-use crate::client_thread::handle_client;
-use crate::server_thread::handle_server;
-use crate::monster::Monster;
+// Self-made modules
+pub mod protocol;
+pub mod multithread;
 
 type Result<T> = result::Result<T, ()>;
 

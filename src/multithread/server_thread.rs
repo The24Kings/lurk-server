@@ -4,12 +4,12 @@ use serde_json::Value;
 use std::sync::mpsc::Receiver;
 use std::result;
 
-use crate::message::Message;
-use crate::character::Character;
-use crate::error_code::ErrorCode;
-use crate::monster::Monster;
+use crate::protocol::message::Message;
+use crate::protocol::character::Character;
+use crate::protocol::error_code::ErrorCode;
+use crate::protocol::monster::Monster;
 
-use crate::utilities::{find_rooms, move_character, send_accept, send_character, send_connections, send_monster, send_room, send_player_update_to_room, send_monster_update_to_room};
+use crate::multithread::utilities::{find_rooms, move_character, send_accept, send_character, send_connections, send_monster, send_room, send_player_update_to_room, send_monster_update_to_room};
 
 type Result<T> = result::Result<T, ()>;
 

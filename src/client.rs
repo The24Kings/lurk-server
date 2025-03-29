@@ -14,10 +14,9 @@ use std::io::{ stdout, Error, Read, Result, Write };
 use crossterm::event::{ poll, read, Event, KeyCode, KeyModifiers };
 use crossterm::terminal::{ self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, DisableLineWrap };
 
-pub mod message;
-pub mod error_code;
+use crate::protocol::message::Message;
 
-use crate::message::Message;
+pub mod protocol;
 
 struct Window {
     scroll_ptr: usize,
